@@ -33,7 +33,7 @@ jobs:
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           # 将 Base64 解码还原为真正的 keystore 文件，放在项目根目录
-          echo "$KEYSTORE_BASE64" | base64 --decode > my.keystore
+          echo "$KEYSTORE_BASE64" | base64 --decode > app/my.keystore
           
           # 动态生成 build.gradle.kts 需要的 keystore.properties
           cat << EOF > keystore.properties
