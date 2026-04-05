@@ -1,0 +1,58 @@
+name: Build Release APK
+
+# 触发条件：
+# 1. 当推送打上 "v*" 标签时（例如 v0.30.0）
+# 2. 手动在 Actions 页面触发 (workflow_dispatch)
+on:
+#  push:
+#    tags:
+#      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: "zulu"
+          java-version: "17"
+          cache: "gradle"
+
+      # 4. 还原签名文件并生成 keystore.properties
+      - name: Prepare Keystore and Properties
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          # 将 Base64 解码还原为真正的 keystore 文件，放在项目根目录
+          echo "$KEYSTORE_BASE64" | base64 --decode > my.keystore
+          
+          # 动态生成 build.gradle.kts 需要的 keystore.properties
+          cat << EOF > keystore.properties
+          storeFile=my.keystore
+          storePassword=$KEYSTORE_PASSWORD
+          keyAlias=$KEY_ALIAS
+          keyPassword=$KEY_PASSWORD
+          EOF
+
+      # 5. 赋予 gradlew 执行权限并仅编译 Release APK
+      - name: Build Release APK
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+
+      # 6. 上传 APK 产物
+      - name: Upload Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: LibreTube-Release-APK
+          # 注意：如果你的 app 模块名字不叫 "app"（例如直接在根目录），请去掉 "app/" 前缀
+          path: app/build/outputs/apk/**/*.apk
