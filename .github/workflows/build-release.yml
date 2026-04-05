@@ -2,9 +2,9 @@ name: Build and release app
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - 'v*.*'
+#  push:
+#    tags:
+#      - 'v*.*'
 
 jobs:
   build:
