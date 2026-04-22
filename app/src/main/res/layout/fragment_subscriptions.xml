@@ -65,7 +65,6 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:animateLayoutChanges="true"
                         android:orientation="vertical">
 
                         <com.google.android.material.button.MaterialButtonGroup
@@ -136,6 +135,11 @@
                                         android:id="@+id/chip_all"
                                         style="@style/ElevatedFilterChip"
                                         android:text="@string/all" />
+
+                                    <com.google.android.material.chip.Chip
+                                        android:id="@+id/chip_ungrouped"
+                                        style="@style/ElevatedFilterChip"
+                                        android:text="@string/ungrouped_channels" />
 
                                 </com.google.android.material.chip.ChipGroup>
 

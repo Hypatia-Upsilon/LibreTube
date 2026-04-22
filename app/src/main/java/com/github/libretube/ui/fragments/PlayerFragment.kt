@@ -449,10 +449,9 @@ class PlayerFragment : Fragment(R.layout.fragment_player), CustomPlayerCallback 
             binding.descriptionLayout.setSegments(segments)
             playerControlsBinding.exoProgress.setSegments(segments)
             playerControlsBinding.sbToggle.isVisible = segments.isNotEmpty()
-            segments.firstOrNull { it.category == PlayerHelper.SPONSOR_HIGHLIGHT_CATEGORY }
-                ?.let {
-                    lifecycleScope.launch(Dispatchers.IO) { initializeHighlight(it) }
-                }
+            getHighlight(segments)?.let {
+                lifecycleScope.launch(Dispatchers.IO) { initializeHighlight(it) }
+            }
         }
 
         val localDownloadVersion = runBlocking(Dispatchers.IO) {
@@ -522,6 +521,8 @@ class PlayerFragment : Fragment(R.layout.fragment_player), CustomPlayerCallback 
             // if the player is minimized, the fragment behind the player should handle the event
             onBackPressedCallback.isEnabled = isMiniPlayerVisible != true
         }
+
+        connectToPlayerView()
 
         toggleVideoInfoVisibility(false)
     }
@@ -1108,6 +1109,17 @@ class PlayerFragment : Fragment(R.layout.fragment_player), CustomPlayerCallback 
         playerBackgroundBinding.videoTransitionProgress.isVisible = !show
     }
 
+    private fun connectToPlayerView() {
+        // initialize the player view actions
+        binding.player.initialize(
+            chaptersViewModel,
+            commonPlayerViewModel,
+            viewModel,
+            viewLifecycleOwner,
+            this
+        )
+    }
+
     @SuppressLint("SetTextI18n")
     private fun updatePlayerView() {
         dismissCommentsSheet()
@@ -1118,15 +1130,6 @@ class PlayerFragment : Fragment(R.layout.fragment_player), CustomPlayerCallback 
             useController = false
             player = playerController
         }
-
-        // initialize the player view actions
-        binding.player.initialize(
-            chaptersViewModel,
-            commonPlayerViewModel,
-            viewModel,
-            viewLifecycleOwner,
-            this
-        )
 
         if (binding.playerMotionLayout.progress != 1.0f) {
             // show controllers when not in picture in picture mode
@@ -1197,6 +1200,12 @@ class PlayerFragment : Fragment(R.layout.fragment_player), CustomPlayerCallback 
 
         if (binding.playerMotionLayout.progress == 0f && PlayerHelper.autoFullscreenShortsEnabled && streams.isShort) {
             setFullscreen()
+        }
+
+        // it's possible that the highlight segment was loaded before the streams info finished loading
+        // in this case, we have to initialize the video highlight chapter once again
+        getHighlight(viewModel.segments.value.orEmpty())?.let {
+            lifecycleScope.launch(Dispatchers.IO) { initializeHighlight(it) }
         }
     }
 
@@ -1281,12 +1290,19 @@ class PlayerFragment : Fragment(R.layout.fragment_player), CustomPlayerCallback 
                 OfflineTimeFrameReceiver(requireContext(), it)
             }
         } else {
+            if (!::streams.isInitialized) return@withContext null
+
             OnlineTimeFrameReceiver(requireContext(), streams.previewFrames)
         }
     }
 
+    private fun getHighlight(segments: List<Segment>): Segment? {
+        return segments.firstOrNull { it.category == PlayerHelper.SPONSOR_HIGHLIGHT_CATEGORY }
+    }
+
     private suspend fun initializeHighlight(highlight: Segment) {
         val frameReceiver = getTimeFrameReceiver() ?: return
+
         val highlightStart = highlight.segmentStartAndEnd.first.toLong()
         val frame = withContext(Dispatchers.IO) {
             frameReceiver.getFrameAtTime(highlightStart * 1000)
@@ -1449,10 +1465,10 @@ class PlayerFragment : Fragment(R.layout.fragment_player), CustomPlayerCallback 
     }
 
     override fun isVideoShort(): Boolean {
-        return streams.isShort
+        return ::streams.isInitialized && streams.isShort
     }
 
     override fun isVideoLive(): Boolean {
-        return streams.isLive
+        return ::streams.isInitialized && streams.isLive
     }
 }

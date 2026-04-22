@@ -15,6 +15,7 @@ import androidx.media3.common.ForwardingPlayer
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
@@ -30,6 +31,7 @@ import com.github.libretube.constants.IntentData
 import com.github.libretube.enums.PlayerCommand
 import com.github.libretube.enums.PlayerEvent
 import com.github.libretube.enums.SbSkipOptions
+import com.github.libretube.extensions.TAG
 import com.github.libretube.extensions.parcelableExtra
 import com.github.libretube.extensions.toastFromMainThread
 import com.github.libretube.extensions.updateParameters
@@ -179,12 +181,18 @@ abstract class AbstractPlayerService : MediaLibraryService(), MediaLibrarySessio
             args.containsKey(PlayerCommand.SET_CAPTION_TRACK.name) -> {
                 val exoPlayer = exoPlayer ?: return
 
-                val captionId = args.getString(PlayerCommand.SET_CAPTION_TRACK.name) ?: return
+                val captionId = args.getString(PlayerCommand.SET_CAPTION_TRACK.name)
                 val caption = PlayerHelper.getCaptionTracks(exoPlayer).firstOrNull { it.id == captionId }
 
                 trackSelector?.updateParameters {
-                    caption?.roleFlags?.let { setPreferredTextRoleFlags(it) }
-                    setPreferredTextLanguage(caption?.language)
+                    val enableCaptions = caption != null
+
+                    if (enableCaptions) {
+                        setPreferredTextRoleFlags(caption.roleFlags)
+                        setPreferredTextLanguage(caption.language)
+                    }
+
+                    setTrackTypeDisabled(C.TRACK_TYPE_TEXT, !enableCaptions)
                 }
             }
 
@@ -377,9 +385,20 @@ abstract class AbstractPlayerService : MediaLibraryService(), MediaLibrarySessio
         this.exoPlayer = player
 
         val forwardingPlayer = MediaSessionForwarder(player)
-        mediaLibrarySession = MediaLibrarySession.Builder(this, forwardingPlayer, this)
-            .setId(this.javaClass.name)
-            .build()
+
+        // it's possible that this is called twice at the same time:
+        // if the user rotates the screen while the initial media library session is still in creation
+        // this results in a race condition which service is the first one to create a `MediaLibrarySession`
+        // the other one will just crash
+        try {
+            mediaLibrarySession = MediaLibrarySession.Builder(this, forwardingPlayer, this)
+                .setId(this.javaClass.name)
+                .build()
+        } catch (e: Exception) {
+            Log.e(TAG(), "failed to start media library session because it already exists")
+            e.printStackTrace()
+            onDestroy()
+        }
     }
 
     /**

@@ -36,15 +36,19 @@ import com.google.android.material.chip.Chip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+
 class SubscriptionsFragment : DynamicLayoutManagerFragment(R.layout.fragment_subscriptions) {
     private var _binding: FragmentSubscriptionsBinding? = null
     private val binding get() = _binding!!
 
     private val viewModel: SubscriptionsViewModel by activityViewModels()
     private val channelGroupsModel: EditChannelGroupsModel by activityViewModels()
+
+    // -1: all
+    // -2: ungrouped
     private var selectedFilterGroup
         set(value) = PreferenceHelper.putInt(PreferenceKeys.SELECTED_CHANNEL_GROUP, value)
-        get() = PreferenceHelper.getInt(PreferenceKeys.SELECTED_CHANNEL_GROUP, 0)
+        get() = PreferenceHelper.getInt(PreferenceKeys.SELECTED_CHANNEL_GROUP, -1)
 
     private var isAppBarFullyExpanded = true
 
@@ -114,11 +118,27 @@ class SubscriptionsFragment : DynamicLayoutManagerFragment(R.layout.fragment_sub
            feed?.firstOrNull { !it.isUpcoming }?.uploaded?.let {
                 PreferenceHelper.updateLastFeedWatchedTime(it, true)
             }
+
+            // ungrouped chip is hidden if the user doesn't use channel groups
+            binding.chipUngrouped.isVisible = !channelGroupsModel.groups.value.isNullOrEmpty()
+                    && filterUngroupedStreamItems(feed.orEmpty()).isNotEmpty()
         }
 
         viewModel.feedProgress.observe(viewLifecycleOwner) { progress ->
             if (progress == null || progress.currentProgress == progress.total) {
-                binding.feedProgressContainer.isGone = true
+                // the automatic animation by setting animateLayoutChanges looks very buggy
+                // so we display a custom animation when the feed finished loading
+                // https://stackoverflow.com/questions/37704046/animatelayoutchanges-buggy-when-changing-visibility-to-gone
+                binding.feedProgressContainer.animate()
+                    .alpha(0.5f)
+                    .scaleY(0.5f)
+                    .withEndAction {
+                        binding.feedProgressContainer.isGone = true
+                        binding.feedProgressContainer.scaleY = 1f
+                        binding.feedProgressContainer.alpha = 1f
+                    }
+                    .setDuration(200)
+                    .start()
             } else {
                 binding.feedProgressContainer.isVisible = true
                 binding.feedProgressText.text = "${progress.currentProgress}/${progress.total}"
@@ -139,7 +159,7 @@ class SubscriptionsFragment : DynamicLayoutManagerFragment(R.layout.fragment_sub
         }
 
         binding.channelGroups.setOnCheckedStateChangeListener { group, _ ->
-            selectedFilterGroup = group.children.indexOfFirst { it.id == group.checkedChipId }
+            selectedFilterGroup = group.children.indexOfFirst { it.id == group.checkedChipId } - 1 // 0th index is "all" button
 
             lifecycleScope.launch {
                 showFeed(restoreScrollState = false)
@@ -226,20 +246,36 @@ class SubscriptionsFragment : DynamicLayoutManagerFragment(R.layout.fragment_sub
         )
     }
 
+    private fun filterUngroupedStreamItems(streamItems: List<StreamItem>): List<StreamItem> {
+        val groups = channelGroupsModel.groups.value.orEmpty()
+
+        return streamItems.filter { streamItem ->
+            groups.none { it.channels.contains(streamItem.uploaderUrl.orEmpty().toID()) }
+        }
+    }
+
     @SuppressLint("InflateParams")
     private fun initChannelGroups() {
         val binding = _binding ?: return
 
-        binding.chipAll.isChecked = selectedFilterGroup == 0
+        val groups = channelGroupsModel.groups.value.orEmpty()
+
+        binding.chipAll.isChecked = selectedFilterGroup == -1
         binding.chipAll.setOnLongClickListener {
             lifecycleScope.launch { playByGroup(0) }
+            true
+        }
+
+        binding.chipUngrouped.isChecked = selectedFilterGroup == -2
+        binding.chipUngrouped.setOnLongClickListener {
+            lifecycleScope.launch { playByGroup(-1) }
             true
         }
 
         binding.channelGroups.removeAllViews()
         binding.channelGroups.addView(binding.chipAll)
 
-        channelGroupsModel.groups.value?.forEachIndexed { index, group ->
+        groups.forEachIndexed { index, group ->
             val chip = layoutInflater.inflate(R.layout.filter_chip, null) as Chip
             chip.apply {
                 id = View.generateViewId()
@@ -254,14 +290,19 @@ class SubscriptionsFragment : DynamicLayoutManagerFragment(R.layout.fragment_sub
 
             binding.channelGroups.addView(chip)
 
-            if (index + 1 == selectedFilterGroup) binding.channelGroups.check(chip.id)
+            if (index == selectedFilterGroup) binding.channelGroups.check(chip.id)
         }
+
+        // only show "ungrouped" chip category if there actually are any ungrouped subscriptions
+        // not sure if it's worth loading them here
+        binding.channelGroups.addView(binding.chipUngrouped)
     }
 
     private fun List<StreamItem>.filterByGroup(groupIndex: Int): List<StreamItem> {
-        if (groupIndex == 0) return this
+        if (groupIndex == -1) return this
+        if (groupIndex == -2) return filterUngroupedStreamItems(this)
 
-        val group = channelGroupsModel.groups.value?.getOrNull(groupIndex - 1)
+        val group = channelGroupsModel.groups.value?.getOrNull(groupIndex)
         return filter {
             val channelId = it.uploaderUrl.orEmpty().toID()
             group?.channels?.contains(channelId) != false
