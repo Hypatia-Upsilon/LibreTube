@@ -84,7 +84,7 @@
     <string name="comments_count">ความคิดเห็น (%1$s)</string>
     <string name="music_videos">วิดีโอ YT Music</string>
     <string name="music_albums">อัลบั้ม YT Music</string>
-    <string name="segment_skipped">ข้ามเซกเมนต์</string>
+    <string name="segment_skipped">เซกเมนต์ที่ข้ามไปแล้ว</string>
     <string name="category_sponsor_summary">การโปรโมทแบบได้รับเงินสนับสนุน, การแนะนำแบบได้รับเงินสนับสนุน และการโฆษณาทางตรง ไม่รวมการโปรโมทตนเอง หรือการแนะนำฟรีให้ กับเนื้อหา, ผู้สร้าง, เว็บไซต์ และผลิตภัณฑ์</string>
     <string name="music_songs">เพลง YT Music</string>
     <string name="category_sponsor">สปอนเซอร์</string>
@@ -163,7 +163,7 @@
     <string name="playing_next">เล่นวิดีโอถัดไปใน %1$s</string>
     <string name="play_automatically">เล่นอัตโนมัติ</string>
     <string name="contribute_to_dearrow">ช่วยเหลือให้ DeArrow</string>
-    <string name="dearrow_summary">แสดงชื่อและภาพของวิดีโอให้ตรงกับเนื้อของวิดีโอมากยิ่งขึ้นและลดความน่าตื่นเต้นที่ไม่จำเป็นลง ระยะเวลาการโหลดจะเพิ่มขึ้น</string>
+    <string name="dearrow_summary">แสดงชื่อและภาพของวิดีโอให้ตรงกับเนื้อหาของวิดีโอมากยิ่งขึ้นและลดความน่าตื่นเต้นที่ไม่จำเป็นลง ระยะเวลาการโหลดจะเพิ่มขึ้น</string>
     <string name="live">ไลฟ์สด</string>
     <string name="github">GitHub</string>
     <string name="yt_shorts">Shorts</string>
@@ -283,7 +283,7 @@
     <string name="category_exclusive_access">สปอนเซอร์พิเศษ</string>
     <string name="category_hook">ฮุค/แนะนำตัว</string>
     <string name="category_hook_summary">สำหรับช่วงฮุคเพื่อดึงดูดความสนใจของผู้ชม (เป็นฉากแรกโดยส่วนมาก) โดยการชมตัวอย่างสั้นหรืออธิบายเหตุการณ์ที่จะเกิดขึ้นภายหลังในวิดีโอนี้หรือตอนถัดไปในอนาคต</string>
-    <string name="category_highlight_summary">อาจเป็นตามชื่อวิดีโอที่กล่าวไว้ รูปหรือจุดที่น่าสนใจที่สุดของวิดีโอนั้น คุณสามารถข้ามโดยการแตะบนหน้าต่างบท</string>
+    <string name="category_highlight_summary">อาจจะเป็นจุดที่ตามชื่อวิดีโอได้เขียนเอาไว้หรือรูปวิดีโอ หรือจุดที่น่าสนใจที่สุดของวิดีโอนั้น คุณสามารถข้ามโดยการแตะบนหน้าต่างบท</string>
     <string name="color_accent">สี</string>
     <string name="normal_views">%1$s วิว %2$s</string>
     <string name="shareTo">แชร์ URL ไปยัง</string>
@@ -324,7 +324,7 @@
     <string name="audio_track_format">%1$s - %2$s</string>
     <string name="unknown_audio_language">ภาษาเสียงที่ไม่ทราบ</string>
     <string name="unknown_audio_track_type">ประเภทช่องเสียงที่ไม่ทราบ</string>
-    <string name="original_or_main_audio_track">ต้นฉบับหรือหลัก</string>
+    <string name="original_or_main_audio_track">ต้นฉบับ</string>
     <string name="dubbed_audio_track">พากย์</string>
     <string name="descriptive_audio_track">เสียงบรรยายภาพ</string>
     <string name="default_or_unknown_audio_track">ค่าเริ่มต้นหรือไม่ทราบ</string>
@@ -353,7 +353,7 @@
     <string name="change">เปลี่ยน</string>
     <string name="gestures">ท่าทาง</string>
     <string name="external_download_provider">ผู้ให้ดาวน์โหลดจากภายนอก</string>
-    <string name="external_download_provider_summary">ใส่ชื่อแพ็คเกจของแอปที่คุณจะใช้ในการดาวน์โหลดวิดีโอ ปล่อยว้างเอาไว้เพื่อใช้ตัวดาวน์โหลดของ LibreTube</string>
+    <string name="external_download_provider_summary">ใส่ชื่อแพ็คเกจของแอปที่คุณจะใช้ในการดาวน์โหลดวิดีโอ ปล่อยเว้นว้างเอาไว้เพื่อใช้ตัวดาวน์โหลดของ LibreTube</string>
     <string name="local_stream_extraction_summary">โหลดข้อมูลวิดีโอจาก YouTube โดยตรงโดยไม่ต้องผ่าน Piped</string>
     <string name="local_ryd">ใช้ตัวดึงข้อมูล Return Youtube Dislike โดยตรง</string>
     <string name="local_ryd_summary">ดึงข้อมูลไม่ถูกใจวิดีโอผ่านทาง https://returnyoutubedislikeapi.com โดยตรง</string>
@@ -553,4 +553,9 @@
     <string name="sort_channel">ชื่อช่อง</string>
     <string name="sort_size">ขนาด</string>
     <string name="show_updates_summary">ตรวจสอบการอัปเดตโดยอัตโนมัติทุกครั้งเมื่อแอปทำงาน</string>
+    <string name="ungrouped_channels">ไม่ได้จัดกลุ่ม</string>
+    <string name="ungrouped_channels_with_count">ไม่ได้จัดกลุ่ม (%1$d)</string>
+    <string name="long_press_fast_forward">เร่งความเร็ววิดีโอเมื่อกดข้าง</string>
+    <string name="long_press_fast_forward_summary">เล่นวิดีโอด้วยความเร็วสองเท่าเมื่อแตะค้างหน้าจอ</string>
+    <string name="resume_all">ดาวน์โหลดต่อ</string>
 </resources>

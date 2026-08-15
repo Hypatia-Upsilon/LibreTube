@@ -11,7 +11,7 @@
     <string name="username">Nama Pengguna</string>
     <string name="register">Daftar</string>
     <string name="logout">Keluar</string>
-    <string name="cancel">Batalkan</string>
+    <string name="cancel">Batal</string>
     <string name="loggedIn">Berhasil masuk.</string>
     <string name="loggedout">Berhasil keluar.</string>
     <string name="registered">Didaftarkan. Sekarang Anda dapat berlangganan ke saluran.</string>
@@ -20,7 +20,7 @@
     <string name="downloadfailed">Unduhan Gagal.</string>
     <string name="import_from_yt">Impor langganan</string>
     <string name="notgmail">Ini untuk akun Piped Anda</string>
-    <string name="already_logged_in">Anda sudah masuk, Anda dapat keluar dari akun anda.</string>
+    <string name="already_logged_in">Anda sudah masuk, Anda dapat keluar dari akun Anda.</string>
     <string name="instances">Pilih…</string>
     <string name="customInstance">Kustom</string>
     <string name="region">Wilayah</string>
@@ -399,11 +399,11 @@
     <string name="chapters_videoHighlight">Sorotan Video</string>
     <string name="unknown_audio_track_type">Jenis trek audio tidak diketahui</string>
     <string name="audio_track_format">%1$s - %2$s</string>
-    <string name="original_or_main_audio_track">asli atau utama</string>
+    <string name="original_or_main_audio_track">Asli</string>
     <string name="unknown_audio_language">Bahasa audio tidak diketahui</string>
-    <string name="dubbed_audio_track">disulih suara</string>
-    <string name="descriptive_audio_track">deskriptif</string>
-    <string name="default_or_unknown_audio_track">bawaan atau tidak diketahui</string>
+    <string name="dubbed_audio_track">Disulih suara</string>
+    <string name="descriptive_audio_track">Deskripsi Audio</string>
+    <string name="default_or_unknown_audio_track">Bawaan</string>
     <string name="unknown_or_no_audio">tidak diketahui atau tidak ada audio</string>
     <string name="continue_watching">Lanjut Menonton</string>
     <string name="dearrow">Aktifkan DeArrow</string>
@@ -538,4 +538,35 @@
     <string name="trailers">Trailer</string>
     <string name="music">Musik</string>
     <string name="include_timestamp_in_filename">Sertakan stempel waktu dalam nama berkas</string>
+    <string name="category_hook">Pembuka / Salam Pembuka</string>
+    <string name="category_hook_summary">Hook naratif untuk menarik perhatian penonton dengan menampilkan cuplikan atau petunjuk kejadian yang akan muncul di video ini atau episode berikutnya</string>
+    <string name="show_updates_summary">Periksa update secara otomatis setiap kali aplikasi dibuka.</string>
+    <string name="checking_frequency_15_minutes">15 menit</string>
+    <string name="checking_frequency_30_minutes">30 menit</string>
+    <string name="checking_frequency_60_minutes">60 menit</string>
+    <string name="checking_frequency_2_hours">2 jam</string>
+    <string name="checking_frequency_6_hours">6 jam</string>
+    <string name="checking_frequency_12_hours">12 jam</string>
+    <string name="checking_frequency_1_day">1 hari</string>
+    <string name="sort_channel">Nama channel</string>
+    <string name="sort_size">Ukuran</string>
+    <string name="backup_creation_success">Pencadangan telah berhasil</string>
+    <string name="backup_creation_failed">Gagal untuk mencadangkan</string>
+    <string name="ungrouped_channels">Belum dikelompokkan</string>
+    <string name="ungrouped_channels_with_count">Belum dikelompokkan (%1$d)</string>
+    <string name="delete_playlist_include_vidoes">Apakah semua video dalam playlist juga ingin dihapus?</string>
+    <plurals name="minutes_left">
+        <item quantity="other">%d menit tersisa</item>
+    </plurals>
+    <plurals name="sleep_timer_chip_minutes">
+        <item quantity="other">%d menit</item>
+    </plurals>
+    <string name="did_you_mean">Maksud Anda:</string>
+    <string name="showing_results_for">Munculkan hasil dari:</string>
+    <string name="long_press_fast_forward">Tekan lama untuk percepat</string>
+    <string name="long_press_fast_forward_summary">Putar video dua kali lipat saat mengetuk dan menahan layar.</string>
+    <string name="resume_all">Lanjutkan Unduhan</string>
+    <string name="courses">Kursus</string>
+    <string name="comment_pinned">Disematkan</string>
+    <string name="comment_verified">Terverifikasi</string>
 </resources>

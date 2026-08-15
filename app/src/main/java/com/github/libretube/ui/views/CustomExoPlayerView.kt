@@ -197,13 +197,15 @@ class CustomExoPlayerView(
         commonPlayerViewModel: CommonPlayerViewModel,
         playerViewModel: PlayerViewModel,
         viewLifecycleOwner: LifecycleOwner,
-        playerCallback: CustomPlayerCallback
+        playerCallback: CustomPlayerCallback,
+        player: Player,
     ) {
         this.chaptersViewModel = chaptersViewModel
         this.playerViewModel = playerViewModel
         this.commonPlayerViewModel = commonPlayerViewModel
         this.viewLifecycleOwner = viewLifecycleOwner
         this.playerCallback = playerCallback
+        super.player = player
 
         initializeGestureProgress()
 
@@ -262,14 +264,14 @@ class CustomExoPlayerView(
             updateDisplayedDurationType(false)
         }
         binding.position.setOnClickListener {
-            if (playerCallback.isVideoLive()) player?.let { it.seekTo(it.duration) }
+            if (playerCallback.isVideoLive()) player.let { it.seekTo(it.duration) }
         }
 
         activity.supportFragmentManager.setFragmentResultListener(
             ChaptersBottomSheet.SEEK_TO_POSITION_REQUEST_KEY,
             findViewTreeLifecycleOwner() ?: activity
         ) { _, bundle ->
-            player?.seekTo(bundle.getLong(IntentData.currentPosition))
+            player.seekTo(bundle.getLong(IntentData.currentPosition))
         }
 
         // enable the chapters dialog in the player
@@ -277,7 +279,7 @@ class CustomExoPlayerView(
             val sheet = chaptersBottomSheet ?: ChaptersBottomSheet()
                 .apply {
                     arguments = bundleOf(
-                        IntentData.duration to player?.duration?.div(1000)
+                        IntentData.duration to player.duration.div(1000)
                     )
                 }
                 .also {
@@ -352,23 +354,6 @@ class CustomExoPlayerView(
             submitDialog.show((context as BaseActivity).supportFragmentManager, null)
         }
 
-        fullscreenResolution = PlayerHelper.getDefaultResolution(context, true)
-        noFullscreenResolution = PlayerHelper.getDefaultResolution(context, false)
-        updateResolution(commonPlayerViewModel.isFullscreen.value == true)
-    }
-
-    override fun setPlayer(player: Player?) {
-        // ensure that the below listeners are only
-        // initialized one single time to the same player
-        if (player == this.player) return
-
-        super.setPlayer(player)
-        player?.let {
-            connectViewToPlayer(it)
-        }
-    }
-
-    private fun connectViewToPlayer(player: Player) {
         binding.playPauseBTN.setOnClickListener {
             player.togglePlayPauseState()
         }
@@ -382,22 +367,6 @@ class CustomExoPlayerView(
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 super.onIsPlayingChanged(isPlaying)
                 keepScreenOn = isPlaying
-            }
-
-            override fun onPlaybackStateChanged(playbackState: Int) {
-                super.onPlaybackStateChanged(playbackState)
-
-                if (playbackState == Player.STATE_READY) {
-                    // set default caption language from preferences if caption language is available
-                    val captions = PlayerHelper.getCaptionTracks(player ?: return)
-                    val defaultLangCaption =
-                        captions.firstOrNull { it.language == PlayerHelper.defaultSubtitleCode }
-
-                    updateCurrentSubtitle(defaultLangCaption?.id)
-
-                    // if the video is live, the remaining time is displayed instead of duration
-                    updateDisplayedDurationType()
-                }
             }
         })
 
@@ -432,6 +401,19 @@ class CustomExoPlayerView(
         }
 
         updateCurrentPosition()
+    }
+
+    /**
+     * @see CustomExoPlayerView.initialize
+     * @see CustomExoPlayerView.detachPlayer
+     */
+    @Deprecated("Use `initialize()` instead to attach `Player` and use `detachPlayer()` to detach it")
+    override fun setPlayer(player: Player?) {
+        super.setPlayer(player)
+    }
+
+    fun detachPlayer(){
+        super.setPlayer(null)
     }
 
     private fun syncQueueButtons() {
@@ -515,7 +497,10 @@ class CustomExoPlayerView(
     private fun setupKeyboardFocus() {
         isFocusable = true
         isFocusableInTouchMode = true
-        requestFocus()
+        // workaround (possibly a no-op?): we don't directly focus the player via
+        // requestFocus() because that leads the focus to be moved back to the search bar
+        // once exiting fullscreen
+        activity.window.decorView.requestFocus()
     }
 
     fun toggleSystemBars(showBars: Boolean) {
@@ -723,7 +708,7 @@ class CustomExoPlayerView(
         }
 
         // The player reference should be not changed between the null check
-        // and its access, so a non null assertion should be safe here
+        // and its access, so a non-null assertion should be safe here
         val selectedAudioLanguagesAndRoleFlags =
             PlayerHelper.getAudioLanguagesAndRoleFlagsFromTrackGroups(
                 player!!.currentTracks.groups,
@@ -752,9 +737,10 @@ class CustomExoPlayerView(
             return context.getString(R.string.default_or_unknown_audio_track)
         }
 
+
         return PlayerHelper.getAudioTrackNameFromFormat(
             context,
-            firstSelectedAudioFormat
+            firstSelectedAudioFormat,
         )
     }
 
@@ -881,11 +867,10 @@ class CustomExoPlayerView(
 
     private fun initializeGestureProgress() {
         gestureViewBinding.brightnessProgressBar.let { bar ->
-            bar.progress =
-                brightnessHelper.getBrightnessWithScale(bar.max.toFloat(), saved = true).toInt()
+            bar.progress = (brightnessHelper.savedWindowBrightness * bar.max).toInt().coerceIn(0, bar.max)
         }
         gestureViewBinding.volumeProgressBar.let { bar ->
-            bar.progress = audioHelper.getVolumeWithScale(bar.max)
+            bar.progress = (audioHelper.deviceVolume * bar.max).toInt().coerceIn(0, bar.max)
         }
     }
 
@@ -908,7 +893,7 @@ class CustomExoPlayerView(
 
         bar.incrementProgressBy(distance.toInt())
         gestureViewBinding.brightnessTextView.text = "${bar.progress.normalize(0, bar.max, 0, 100)}"
-        brightnessHelper.setBrightnessWithScale(bar.progress.toFloat(), bar.max.toFloat())
+        brightnessHelper.windowBrightness = bar.progress.toFloat() / bar.max
     }
 
     private fun updateVolume(distance: Float) {
@@ -918,7 +903,7 @@ class CustomExoPlayerView(
                 isVisible = true
                 // Volume could be changed using other mediums, sync progress
                 // bar with new value.
-                bar.progress = audioHelper.getVolumeWithScale(bar.max)
+                bar.progress = (audioHelper.deviceVolume * bar.max).toInt().coerceIn(0, bar.max)
             }
         }
 
@@ -931,7 +916,7 @@ class CustomExoPlayerView(
             )
         }
         bar.incrementProgressBy(distance.toInt())
-        audioHelper.setVolumeWithScale(bar.progress, bar.max)
+        audioHelper.deviceVolume = bar.progress.toFloat() / bar.max
 
         gestureViewBinding.volumeTextView.text = "${bar.progress.normalize(0, bar.max, 0, 100)}"
     }
@@ -1071,6 +1056,12 @@ class CustomExoPlayerView(
             .show(supportFragmentManager)
     }
 
+    fun setToDefaultResolution() {
+        fullscreenResolution = PlayerHelper.getDefaultResolution(context, true)
+        noFullscreenResolution = PlayerHelper.getDefaultResolution(context, false)
+        updateResolution(isFullscreen())
+    }
+
     private fun updateResolution(isFullscreen: Boolean) {
         if (!isFullscreen && noFullscreenResolution != null) {
             setPlayerResolution(noFullscreenResolution!!)
@@ -1108,9 +1099,6 @@ class CustomExoPlayerView(
             player.currentTracks.groups,
             false
         )
-        val audioLanguages = audioLanguagesAndRoleFlags.map {
-            PlayerHelper.getAudioTrackNameFromFormat(context, it)
-        }
         val baseBottomSheet = BaseBottomSheet()
 
         if (audioLanguagesAndRoleFlags.isEmpty() || (audioLanguagesAndRoleFlags.size == 1 &&
@@ -1129,13 +1117,19 @@ class CustomExoPlayerView(
                 listener = null
             )
         } else {
+            val sortedAudioTracks = audioLanguagesAndRoleFlags
+                // audio tracks have only a single flag set
+                // ordered by main, dubbed, audio descriptive
+                .sortedBy { it.second }
+
             baseBottomSheet.setSimpleItems(
-                audioLanguages,
-                preselectedItem = selectedAudioLanguageAndRoleFlags?.let {
+                sortedAudioTracks
+                .map {
                     PlayerHelper.getAudioTrackNameFromFormat(context, it)
                 },
+                preselectedItem = getCurrentAudioTrackTitle(),
             ) { index ->
-                val selectedAudioFormat = audioLanguagesAndRoleFlags[index]
+                val selectedAudioFormat = sortedAudioTracks[index]
                 player.sendCustomCommand(
                     AbstractPlayerService.runPlayerActionCommand, bundleOf(
                         PlayerCommand.SET_AUDIO_ROLE_FLAGS.name to selectedAudioFormat.second
@@ -1353,7 +1347,7 @@ class CustomExoPlayerView(
     }
 
     override fun onLongPressEnd() {
-        if (!PlayerHelper.doubleTapToSeek) return
+        if (!PlayerHelper.longPressFastForward) return
 
         backgroundBinding.fastForwardView.isGone = true
 
@@ -1445,6 +1439,7 @@ class CustomExoPlayerView(
         return width to height
     }
 
+    var alreadySetDefaultSubtitle: Boolean = false
     fun onPlaybackEvents(player: Player, events: Player.Events) {
         if (events.containsAny(
                 Player.EVENT_PLAYBACK_STATE_CHANGED,
@@ -1463,6 +1458,25 @@ class CustomExoPlayerView(
         if (events.contains(Player.EVENT_RENDERED_FIRST_FRAME)) {
             // if the video is not starting automatically, show the controller
             if (!PlayerHelper.playAutomatically) showControllerPermanently()
+        }
+
+        if (events.contains(Player.EVENT_RENDERED_FIRST_FRAME) && !alreadySetDefaultSubtitle) {
+            // only set the default subtitle at the start of the playback session
+            alreadySetDefaultSubtitle = true
+
+            // set default caption language from preferences if caption language is available
+            val captions = PlayerHelper.getCaptionTracks(player)
+            val defaultLangCaption =
+                captions.firstOrNull { it.language == PlayerHelper.defaultSubtitleCode }
+
+            updateCurrentSubtitle(defaultLangCaption?.id)
+
+            // if the video is live, the remaining time is displayed instead of duration
+            updateDisplayedDurationType()
+        }
+        if (events.contains(Player.EVENT_MEDIA_METADATA_CHANGED)) {
+            // new video started
+            alreadySetDefaultSubtitle = false
         }
 
         updateDisplayedDuration()

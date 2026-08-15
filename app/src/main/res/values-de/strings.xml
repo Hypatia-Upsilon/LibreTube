@@ -73,15 +73,15 @@
     <string name="music_videos">YT Music-Videos</string>
     <string name="music_albums">YT Music-Alben</string>
     <string name="music_playlists">YT Music-Playlists</string>
-    <string name="playlists">Playlists</string>
+    <string name="playlists">Wiedergabelisten</string>
     <string name="category_intro">Unterbrechung/Intro-Animation</string>
     <string name="category_outro">Endkarten und Abspann</string>
     <string name="sponsorblock_summary">Verwendet die https://sponsor.ajay.app API</string>
     <string name="category_segments">Abschnitte</string>
-    <string name="category_selfpromo_summary">Ähnlich wie „Gesponsorte Videosegmente“, außer für unbezahlte Werbung oder Eigenwerbung. Dazu gehören Abschnitte über Merchandise, Spenden oder Informationen darüber, mit wem zusammengearbeitet wurde</string>
+    <string name="category_selfpromo_summary">Ähnlich wie „Bezahlte Videosegmente“, außer für unbezahlte Werbung oder Eigenwerbung. Dazu gehören Abschnitte über Merchandise, Spenden oder Informationen darüber, mit wem zusammengearbeitet wurde</string>
     <string name="sponsorblock">SponsorBlock</string>
     <string name="segment_skipped">Abschnitt übersprungen</string>
-    <string name="category_sponsor">Gesponsorte Videosegmente</string>
+    <string name="category_sponsor">Bezahlte Videosegmente</string>
     <string name="category_sponsor_summary">Bezahlte Werbung, bezahlte Empfehlungen und Direktwerbung. Nicht für Eigenwerbung, kostenlose Fremdwerbung oder Empfehlungen für Anliegen, Kanäle, Webseiten und Produkte</string>
     <string name="category_selfpromo">Unbezahlt/Eigenwerbung</string>
     <string name="category_interaction">Interaktionserinnerung</string>
@@ -401,10 +401,10 @@
     <string name="audio_track_format">%1$s - %2$s</string>
     <string name="unknown_audio_language">Unbekannte Audiosprache</string>
     <string name="unknown_audio_track_type">Unbekannter Audio-Track-Typ</string>
-    <string name="original_or_main_audio_track">Original- oder Hauptspur</string>
+    <string name="original_or_main_audio_track">Original</string>
     <string name="dubbed_audio_track">Synchronisiert</string>
-    <string name="descriptive_audio_track">Deskriptiv</string>
-    <string name="default_or_unknown_audio_track">Standard oder unbekannt</string>
+    <string name="descriptive_audio_track">Audiodeskription</string>
+    <string name="default_or_unknown_audio_track">Standard</string>
     <string name="unknown_or_no_audio">Unbekannt oder kein Ton</string>
     <string name="continue_watching">Weiterschauen</string>
     <string name="dearrow_summary">Präzisere und weniger sensationslüsterne Titel und Miniaturansichten (Thumbnails) anzeigen. Erhöht die Ladezeiten.</string>
@@ -542,8 +542,8 @@
     <string name="did_you_mean">Meintest du:</string>
     <string name="showing_results_for">Ergebnisse für:</string>
     <string name="delete_playlist_include_vidoes">Auch alle Videos aus der Playlist löschen?</string>
-    <string name="category_hook_summary">Narrative Hooks, welche die Aufmerksamkeit der Zuschauenden auf sich ziehen (oft als erste Szene), indem sie Ereignisse aus späteren Teilen des Videos oder zukünftigen Episoden einer Serie andeuten oder beschreiben</string>
-    <string name="category_hook">Hooks/Begrüßungen</string>
+    <string name="category_hook_summary">Narrative Aufhänger, welche die Aufmerksamkeit der Zuschauenden auf sich ziehen (oft als erste Szene), indem sie Ereignisse aus späteren Teilen des Videos oder zukünftigen Episoden einer Serie andeuten oder beschreiben</string>
+    <string name="category_hook">Aufhänger/Begrüßungen</string>
     <string name="checking_frequency_15_minutes">15 Minuten</string>
     <string name="checking_frequency_30_minutes">30 Minuten</string>
     <string name="checking_frequency_60_minutes">60 Minuten</string>
@@ -568,4 +568,7 @@
     <string name="ungrouped_channels_with_count">Nicht gruppiert (%1$d)</string>
     <string name="long_press_fast_forward">Gedrückt halten zum Vorspulen</string>
     <string name="long_press_fast_forward_summary">Bildschirm gedrückt halten, um das Video in doppelter Geschwindigkeit abzuspielen.</string>
+    <string name="resume_all">Downloads fortsetzen</string>
+    <string name="comment_verified">Verifiziert</string>
+    <string name="comment_pinned">Angepinnt</string>
 </resources>
